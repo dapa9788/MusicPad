@@ -1,9 +1,13 @@
 import sys
+import pygame #sound audios
 from PySide6.QtWidgets import QApplication, QWidget, QPushButton, QGridLayout
+from bank import SoundBank
 
 class MusicPad(QWidget):
     def __init__(self):
         super().__init__() #initializes QWidget
+        self.bank = SoundBank("banks/default.json")
+
 
         self.setWindowTitle("Music Pad")
         self.adjustSize()
@@ -15,8 +19,11 @@ class MusicPad(QWidget):
         for row in range(4):
             for col in range(4):
                 pad_number = row * 4 + col + 1
-
-                button = QPushButton(str(pad_number))
+                sound = self.bank.get_sound(pad_number)
+                if sound:
+                    button = QPushButton(sound)
+                else:
+                    button = QPushButton("[empty]")
                 button.setFixedSize(90, 90)
                 button.clicked.connect(
                     lambda checked, num=pad_number: self.pad_pressed(num)
@@ -27,11 +34,14 @@ class MusicPad(QWidget):
         self.setLayout(layout)
 
     def pad_pressed(self, number):
-        print(f"Pad {number} pressed")
+        sound = self.bank.get_sound(number)
+        if sound:
+            pygame.mixer.Sound(sound).play()
+        #print(sound)
 
 app = QApplication(sys.argv) #QApplication is my entire applicaiton
+pygame.mixer.init()
 window = MusicPad() #QUI object
-window.setWindowTitle("Music Pad")
 
 window.show() #Open the window
 
