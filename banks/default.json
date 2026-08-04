@@ -1,8 +1,8 @@
 {
     "name": "Default Bank",
     "pads": {
-        "1": "C:/Users/Daniel Park/Downloads/MusicPadProject/sounds/Drums/snare.wav",
-        "2": "C:/Users/Daniel Park/Downloads/MusicPadProject/sounds/Drums/tom_low.wav",
+        "1": "C:/Users/Daniel Park/Downloads/MusicPadProject/sounds/Drums/tom_low.wav",
+        "2": "C:/Users/Daniel Park/Downloads/MusicPadProject/sounds/Drums/snare.wav",
         "3": "C:/Users/Daniel Park/Downloads/MusicPadProject/sounds/Drums/kick.wav",
         "4": "C:/Users/Daniel Park/Downloads/MusicPadProject/sounds/Drums/long_cymbol.wav",
         "5": "C:/Users/Daniel Park/Downloads/MusicPadProject/sounds/Drums/tom_mid.wav",
