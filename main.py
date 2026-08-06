@@ -50,11 +50,11 @@ class MusicPad(QWidget):
         stop_button = QPushButton("Stop")
         stop_button.clicked.connect(self.stop_recording)
 
-        layout.addWidget(change_button, 4, 0, 1, 4)
-
         layout.addWidget(record_button, 5, 0)
-        layout.addWidget(play_button,   5, 1, 1, 2)  # spans two columns
-        layout.addWidget(stop_button,   5, 3)
+        layout.addWidget(play_button, 5, 1, 1, 2)  # spans two columns
+        layout.addWidget(stop_button, 5, 3)
+
+        layout.addWidget(change_button, 4, 0, 1, 4)
 
     def pad_pressed(self, number):
         self.selected_pad = number
@@ -90,15 +90,23 @@ class MusicPad(QWidget):
 
     def stop_recording(self):
         self.recorder.stop()
-        print("Stopped Recording:")
+        self.is_playing = False
+        #print("Stopped Recording:")
 
     def play_recording(self):
-        print("Playing...")
-        self.recorder.stop()
+        print("Playing..." + str(self.recorder.get_events()))
+        if self.recorder.recording:
+            self.recorder.stop()
+        self.is_playing = True
         events = self.recorder.get_events()
         for event in events:
             QTimer.singleShot(int(event["time"]*1000), lambda pad=event["pad"]: self.play_pad(pad))
-        
+        if events:
+            loop_time = int(self.recorder.get_loop_time()*1000)
+            print(loop_time)
+
+            QTimer.singleShot(loop_time,lambda: self.play_recording() if self.is_playing else None)
+            
 
 app = QApplication(sys.argv) #QApplication is my entire applicaiton
 pygame.mixer.init()
