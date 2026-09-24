@@ -36,6 +36,8 @@ class MusicPad(QWidget):
         play_button.pressed.connect(self.play_recording)
         stop_button = QPushButton("Stop")
         stop_button.pressed.connect(self.stop_recording)
+        library_button = QPushButton("Sound Library")
+        library_button.pressed.connect(self.open_sound_library)
 
         bpm_input = QSpinBox()
         bpm_input.setRange(40, 300)
@@ -49,7 +51,8 @@ class MusicPad(QWidget):
         layout.addWidget(stop_button, 6, 3)
         layout.addWidget(bpm_input, 0, 1)
         layout.addWidget(bpm_button, 0, 2)
-        layout.addWidget(change_button, 5, 0, 1, 4)
+        layout.addWidget(library_button, 5, 0, 1, 2)
+        layout.addWidget(change_button, 5, 2, 1, 2)
 
         for row in range(4):
             for col in range(4):
@@ -83,6 +86,9 @@ class MusicPad(QWidget):
         self.pads[number].play()
 
     def change_sound(self):
+        if self.selected_pad is None:
+            print("Select a pad first.")
+            return
         file, _ = QFileDialog.getOpenFileName(
             self,
             "Choose Sound",
@@ -134,6 +140,68 @@ class MusicPad(QWidget):
         target = self.song_start + self.loop_number * loop_length
         delay = max(0, target - time.perf_counter())
         QTimer.singleShot(int(delay * 1000), self.play_loop)
+
+    def open_sound_library(self):
+        self.sound_library = QWidget()
+        self.sound_library.setWindowTitle("Sound Library")
+        self.sound_library.setFixedSize(500, 400)
+
+        layout = QGridLayout()
+
+        sounds = self.get_all_sounds()
+
+        categories = {}
+
+        for category, sound in sounds:
+            if category not in categories:
+                categories[category] = []
+            categories[category].append(sound)
+
+        row = 0
+
+        for category, category_sounds in categories.items():
+            category_label = QPushButton(category)
+            category_label.setEnabled(False)
+            layout.addWidget(category_label, row, 0, 1, 3)
+            row += 1
+
+            for index, sound in enumerate(category_sounds):
+                name = os.path.splitext(os.path.basename(sound))[0]
+
+                button = QPushButton(f"▶ {name}")
+                button.pressed.connect(
+                    lambda sound=sound: self.preview_sound(sound)
+                )
+
+                col = index % 3
+
+                layout.addWidget(button, row, col)
+
+                if col == 2:
+                    row += 1
+
+            if len(category_sounds) % 3 != 0:
+                row += 1
+
+        self.sound_library.setLayout(layout)
+        self.sound_library.show()
+
+    def preview_sound(self, sound):
+        pygame.mixer.Sound(sound).play()
+
+    def get_all_sounds(self):
+        sounds = []
+
+        for category in os.listdir("sounds"):
+            category_path = os.path.join("sounds", category)
+
+            if os.path.isdir(category_path):
+                for filename in os.listdir(category_path):
+                    if filename.lower().endswith(".wav"):
+                        filepath = os.path.join(category_path, filename)
+                        sounds.append((category, filepath))
+
+        return sounds
 
 app = QApplication(sys.argv) #QApplication is my entire applicaiton
 pygame.mixer.init()
